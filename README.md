@@ -15,191 +15,103 @@ solidity是以太坊的智能合约语言，随着solidity的流行，现在很�
 solidity的语法和js很像，首先遍历一下solidity的关键字以及它们的用途，注意这里是大部分，不是全部；
 
 ```solidity
-
 // 声明solidity的编译版本
-
 pragma solidity >0.4.19;
 
-
-
 // 通过相对目录引入合约
-
 //import "./ownable.sol";
 
-
-
 // 申明一个合约接口，可以申明通用的，升级合约也不会变的接口级结构，比如ERC20
-
 // 声明与abi的接口一致
-
 contract KittyInterface {
-
   function getKitty(uint256 _id) external view returns (
-
     bool isGestating,
-
     bool isReady
-
   );
-
 }
-
-
 
 // 声明一个合约，在以太中属于合约账户，存在一个地址，可以存储、发送余额
-
 // is 声明继承自哪个合约，可以复用代码
-
 contract ZombieFactory is Ownable {
 
-
-
     // 声明事件，可以使用emit触发事件
-
     uint=uint256，evm默认字长为256位，除了在结构体申明的非uint256，其他都会转为uint256
-
     // string 可以存储任意长字符串，但是为了节约存储，最好保存少点
-
     event NewZombie(uint zombieId, string name, uint dna);
 
-
-
     // 通过合约地址实例化合约，可以通过函数动态生成合约
-
-    // 调用 (,isReady) = kittyContract.getKitty(_kittyId);
-
+    // 调用  (,isReady) = kittyContract.getKitty(_kittyId);
     address _address = 0x06012c8cf97BEaD5deAe237070F9587f8E7A266d;
-
     KittyInterface kittyContract = KittyInterface(_address);
 
-
-
     // 声明状态变量，所有在合约内声明的变量都是状态变量，存储在区块链中的storage，持久化在区块链中
-
     // 很神奇吧，除了在第一次初始创建时，是用合约部署费用创建的，其他对状态变量的修改，都会触发存储fee，存储的fee比较高
-
     // ether为以太坊余额单位 1 ether = 1000 finney = 10**18 wei
-
     uint balance = 1 ether;
-
     // days 表示时间 其实是语法糖 1 days = 3600 * 24
-
     uint cooldownTime = 1 days;
 
-
-
     // struct表示结构体，可以自定义类型，
-
     // 同时struct中的uint16 uint32会优化为占用较小的存储，节约gas
-
     // 存储的string最好在初始保存时，校验string大小，避免用超
-
     struct Zombie {
-
       string name;
-
       uint dna;
-
       uint32 level;
-
     }
-
-
 
     // 数组声明，声明为public，外部可见，部署存在一个默认生成getter函数，外部合约可以直接访问变量
-
     Zombie[] public zombies;
 
-
-
     // solidity不能返回自定义状态变量，只能返回memory变量
-
     function zombies(uint index) view public returns (
-
       string memory name,
-
       uint dna,
-
       uint32 level
-
     ){
-
         return (zombies[index].name, zombies[index].dna, zombies[index].level);
-
     }
-
-
 
     // 没有描述访问权限的状态变量，默认权限是internal，只能被当前合约和子合约访问
-
     // mapping结构定义了类似字典结构，可以定义一种映射关系，可以用于快速查找
-
     // 利用一个数组 Zombie[]，两个mapping存储Zombie的index，来提高查找效率，同时避免一个地址映射到一个数组，如果删除会导致数组整体移动，耗费过高存储
-
     mapping (uint => address) public zombieToOwner;
-
     mapping (address => uint) ownerZombieCount;
 
-
-
     // 定义函数修饰器，可以声明在函数后，共享方法入参，执行该函数时，首先执行修饰器，然后在_占位符执行被修饰函数
-
     // 对于入参或者internal的函数，推荐以_开头命名，职责清楚
-
     modifier ownerOf(uint _zombieId) {
-
         // 使用断言来进行条件判断，如果校验失败会报错
-
         // 使用require(bool condition, string message)返回错误message
-
         require(msg.sender == zombieToOwner[_zombieId]);
-
         _;
-
     }
 
-
+    // 构造函数，在合约部署的时候会自动执行
+    constructor() public {
+        owner = msg.sender;
+    }
 
     // 定义一个函数，常用定义如：
-
     // function (funcName) (<parameter types>) {public|external|internal|private} [view|pure|payable] [returns (<return types>)]
-
     // 函数访问权限修饰符 public内部、子合约及外部合约可调用、external只允许外部合约调用、internal只允许内部或子合约调用、private只允许内部合约调用
-
     // 函数行为修饰符 view承若只查看状态变量不修改，pure承诺不和合约状态变量交互，payable承诺会存在以太坊转账操作，注意如果转账没有payable修饰会报错
-
     // 函数返回值，可以返回多个值
-
     function queryZombie(uint _zombieId) public view ownerOf(_zombieId) returns (string memory name, uint dna, uint32 level) {
-
         Zombie memory zombie = zombies[_zombieId];
-
         return (zombie.name, zombie.dna, zombie.level);
-
     }
-
     
-
     // 向合约支付一定余额，使用payable修饰
-
     function paysomething(uint balabce) external payable {
-
         this.transfer(balabce);
-
     }
-
-
 
     // 合约向owner支付所有余额
-
     function withdraw() external onlyOwner {
-
         owner.transfer(this.balance);
-
     }
-
 }
-
 ```
 
 ### 节约gas
