@@ -24,7 +24,8 @@ abstract contract Context {
     }
 
     function _msgData() internal view virtual returns (bytes calldata) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        this;
+        // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         return msg.data;
     }
 }
@@ -133,7 +134,7 @@ library Address {
 
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
-        assembly { size := extcodesize(account) }
+        assembly {size := extcodesize(account)}
         return size > 0;
     }
 
@@ -157,7 +158,7 @@ library Address {
         require(address(this).balance >= amount, "Address: insufficient balance");
 
         // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
-        (bool success, ) = recipient.call{ value: amount }("");
+        (bool success,) = recipient.call{value : amount}("");
         require(success, "Address: unable to send value, recipient may have reverted");
     }
 
@@ -219,7 +220,7 @@ library Address {
         require(isContract(target), "Address: call to non-contract");
 
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{ value: value }(data);
+        (bool success, bytes memory returndata) = target.call{value : value}(data);
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
@@ -271,7 +272,7 @@ library Address {
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
-    function _verifyCallResult(bool success, bytes memory returndata, string memory errorMessage) private pure returns(bytes memory) {
+    function _verifyCallResult(bool success, bytes memory returndata, string memory errorMessage) private pure returns (bytes memory) {
         if (success) {
             return returndata;
         } else {
@@ -847,7 +848,7 @@ uniswapPairPath[0] = _uniswapV2Router.WETH();
 uniswapPairPath[1] = address(_tokenContract);
 
 _uniswapV2Router.swapExactETHForTokensSupportingFeeOnTransferTokens{
-value: EthAmount
+value : EthAmount
 }(0, uniswapPairPath, address(this), block.timestamp);
 }
 }
@@ -1138,7 +1139,7 @@ require(
 !_isExcluded[sender],
 "PLASMA: Excluded addresses cannot call this function"
 );
-(uint256 rAmount, , , , , ) = _getValues(tAmount);
+(uint256 rAmount,,,,,) = _getValues(tAmount);
 _rOwned[sender] = _rOwned[sender].sub(rAmount);
 _rTotal = _rTotal.sub(rAmount);
 _tFeeTotal = _tFeeTotal.add(tAmount);
@@ -1151,10 +1152,10 @@ returns (uint256)
 {
 require(tAmount <= _tTotal, "Amount must be less than supply");
 if (!deductTransferFee) {
-(uint256 rAmount, , , , , ) = _getValues(tAmount);
+(uint256 rAmount,,,,,) = _getValues(tAmount);
 return rAmount;
 } else {
-(, uint256 rTransferAmount, , , , ) = _getValues(tAmount);
+(, uint256 rTransferAmount,,,,) = _getValues(tAmount);
 return rTransferAmount;
 }
 }
@@ -1341,7 +1342,7 @@ private
 _approve(address(this), address(_uniswapV2Router), tokenAmount);
 
 // add the liquidity
-_uniswapV2Router.addLiquidityETH{value: ethAmount}(
+_uniswapV2Router.addLiquidityETH{value : ethAmount}(
 address(this),
 tokenAmount,
 0, // slippage is unavoidable
@@ -1696,8 +1697,8 @@ uint256,
 uint256
 )
 {
-uint256 tFee = tAmount.mul(taxFee).div(10**(feeDecimals + 2));
-uint256 tLockFee = tAmount.mul(lockFee).div(10**(feeDecimals + 2));
+uint256 tFee = tAmount.mul(taxFee).div(10 ** (feeDecimals + 2));
+uint256 tLockFee = tAmount.mul(lockFee).div(10 ** (feeDecimals + 2));
 uint256 tTransferAmount = tAmount.sub(tFee).sub(tLockFee);
 return (tTransferAmount, tFee, tLockFee);
 }
@@ -1733,7 +1734,7 @@ uint256 _amount,
 uint256 _feeDeci,
 uint256 _percentage
 ) public pure returns (uint256 amount) {
-amount = _amount.mul(_percentage).div(10**(uint256(_feeDeci) + 2));
+amount = _amount.mul(_percentage).div(10 ** (uint256(_feeDeci) + 2));
 }
 
 function _getCurrentSupply() public view returns (uint256, uint256) {
@@ -1794,7 +1795,7 @@ emit FeeDecimalsUpdated(feeDecimals);
 
 function _setTaxFee(uint256 taxFee) external onlyOwner() {
 require(
-taxFee >= 0 && taxFee <= 10 * 10**_feeDecimals,
+taxFee >= 0 && taxFee <= 10 * 10 ** _feeDecimals,
 "PLASMA: taxFee should be in 0 - 10"
 );
 _taxFee = taxFee;
@@ -1803,7 +1804,7 @@ emit TaxFeeUpdated(taxFee);
 
 function _setLockFee(uint256 lockFee) external onlyOwner() {
 require(
-lockFee >= 0 && lockFee <= 10 * 10**_feeDecimals,
+lockFee >= 0 && lockFee <= 10 * 10 ** _feeDecimals,
 "PLASMA: lockFee should be in 0 - 10"
 );
 _lockFee = lockFee;
